@@ -55,18 +55,9 @@ report 50119 "Management Fee Calculation"
                 { }
                 column(Contract_Status; "Contract Status")
                 { }
-
-                trigger OnAfterGetRecord()
-                begin
-                    TotalMgtFee += "Management Fee Calc. Line"."Management Fee";
-                end;
+                column(Total_Mgt__Fee; "Total Mgt. Fee")
+                { }
             }
-
-            trigger OnPreDataItem()
-            begin
-                TotalMgtFee := 0;
-            end;
-
             trigger OnAfterGetRecord()
             begin
                 CalcFields("Owner Name");

@@ -164,6 +164,11 @@ page 50988 "Management Fee Calc Grid"
                     Visible = false;
                 }
             }
+            field("Total Mgt. Fee"; Rec."Total Mgt. Fee")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Indicates the Total Managment Fee';
+            }
 
         }
 
@@ -188,6 +193,12 @@ page 50988 "Management Fee Calc Grid"
             }
         }
     }
+
+    trigger OnAfterGetCurrRecord()
+    begin
+        Rec.CalcFields("Total Mgt. Fee");
+    end;
+
     trigger OnOpenPage()
     begin
         if Rec.IsEmpty() then begin

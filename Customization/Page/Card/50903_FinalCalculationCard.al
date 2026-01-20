@@ -372,49 +372,6 @@ page 50903 "Final Calculation Card"
                     // Visible = isVisible;
                 }
             }
-            group("Rent-Calculation")
-            {
-                part("Rent Calculation"; "Rent Calculate Sub Card")
-                {
-                    SubPageLink = "Contract ID" = FIELD("Contract ID"); // Link to filter attachments for this owner only
-                    ApplicationArea = All;
-                    UpdatePropagation = Both;
-                    // Visible = isVisible;
-                }
-            }
-            group("Revenue-structure")
-            {
-                part("Other Payment"; "OtherPayment Calculate SubCard")
-                {
-                    SubPageLink = "Contract ID" = FIELD("Contract ID"); // Link to filter attachments for this owner only
-                    ApplicationArea = All;
-                    UpdatePropagation = Both;
-                    // Visible = isVisible;
-                }
-            }
-            group("Revenue structure - Yearly break-down")
-            {
-                part("Revenue Structure"; "Revenue Calculate Sub Card")
-                {
-                    SubPageLink = "Contract ID" = FIELD("Contract ID"); // Link to filter attachments for this owner only
-                    ApplicationArea = All;
-                    UpdatePropagation = Both;
-                    // Visible = isVisible;
-                }
-            }
-
-            // part("PaymentSchedule"; "Payment Schedule Card2")
-            // {
-            //     SubPageLink = "Contract ID" = FIELD("Contract ID"),
-            //   "Tenant ID" = FIELD("Tenant ID");
-            //     ApplicationArea = All;
-            // }
-            part(PaymentDetails; "Payment Details")
-            {
-                SubPageLink = "Contract ID" = FIELD("Contract ID");
-                ApplicationArea = All;
-                UpdatePropagation = Both;
-            }
             group("Carry Forward the Security Deposit From")
             {
                 field("ContractID"; Rec."Contract ID")
@@ -612,6 +569,49 @@ page 50903 "Final Calculation Card"
                     UpdatePropagation = Both;
                     // Visible = isVisible;
                 }
+            }
+            group("Rent-Calculation")
+            {
+                part("Rent Calculation"; "Rent Calculate Sub Card")
+                {
+                    SubPageLink = "Contract ID" = FIELD("Contract ID"); // Link to filter attachments for this owner only
+                    ApplicationArea = All;
+                    UpdatePropagation = Both;
+                    // Visible = isVisible;
+                }
+            }
+            group("Revenue-structure")
+            {
+                part("Other Payment"; "OtherPayment Calculate SubCard")
+                {
+                    SubPageLink = "Contract ID" = FIELD("Contract ID"); // Link to filter attachments for this owner only
+                    ApplicationArea = All;
+                    UpdatePropagation = Both;
+                    // Visible = isVisible;
+                }
+            }
+            group("Revenue structure - Yearly break-down")
+            {
+                part("Revenue Structure"; "Revenue Calculate Sub Card")
+                {
+                    SubPageLink = "Contract ID" = FIELD("Contract ID"); // Link to filter attachments for this owner only
+                    ApplicationArea = All;
+                    UpdatePropagation = Both;
+                    // Visible = isVisible;
+                }
+            }
+
+            // part("PaymentSchedule"; "Payment Schedule Card2")
+            // {
+            //     SubPageLink = "Contract ID" = FIELD("Contract ID"),
+            //   "Tenant ID" = FIELD("Tenant ID");
+            //     ApplicationArea = All;
+            // }
+            part(PaymentDetails; "Payment Details")
+            {
+                SubPageLink = "Contract ID" = FIELD("Contract ID");
+                ApplicationArea = All;
+                UpdatePropagation = Both;
             }
         }
     }
@@ -1726,7 +1726,7 @@ page 50903 "Final Calculation Card"
         tenancyContractSub: Record "Tenancy Contract Subpage";
         item: Record Item;
         finalAdj: Record FinancialAdjContractReduction;
-        pendingReceiveable: Record "Pending Receviable Grid";
+        paymentScheduleGrid: Record "Payment Schedule2";
     begin
         finalAdj.SetRange("Contract No.", Rec."Contract ID");
         if not finalAdj.IsEmpty() then
@@ -1738,17 +1738,16 @@ page 50903 "Final Calculation Card"
                 item.SetRange("Item type template", item."Item type template"::"Secondary Item");
                 item.SetFilter("Category Types", '%1|%2|%3|%4', 'Refundable Deposit', 'Government fees', 'Govt. Fees', 'Government Fees');
                 if item.FindFirst() then begin
-                    pendingReceiveable.SetRange("Contract ID", Rec."Contract ID");
-                    pendingReceiveable.SetRange(RevenueDescription, item.Description);
-                    if pendingReceiveable.FindFirst() then begin
+                    paymentScheduleGrid.SetRange("Contract ID", Rec."Contract ID");
+                    paymentScheduleGrid.SetRange("Secondary Item Type", item.Description);
+                    paymentScheduleGrid.SetFilter("Payment Status", '<>%1', 'Received');
+                    if paymentScheduleGrid.FindFirst() then begin
                         finalAdj.Init();
                         finalAdj."Contract No." := Rec."Contract ID";
                         finalAdj."Revenue Description" := item.Description;
                         finalAdj.Insert(true);
-                        finalAdj.Validate(Amount, pendingReceiveable.DifferenceAmount);
+                        finalAdj.Validate(Amount, paymentScheduleGrid.Amount);
                         finalAdj.Validate("VAT %", item."VAT %");
-                        // finalAdj."VAT Amount" := pendingReceiveable.DifferenceVAT;
-                        // finalAdj."Amount Incl. VAT" := pendingReceiveable.DifferenceAmountInclVAT;
                         Clear(finalAdj);
                     end;
                 end;
